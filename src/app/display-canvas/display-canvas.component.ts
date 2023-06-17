@@ -4,6 +4,7 @@ import {
   OnInit,
   ViewChild,
   AfterViewInit,
+  HostListener,
 } from '@angular/core';
 import { Vector3 } from 'three';
 import * as THREE from 'three-full';
@@ -27,15 +28,15 @@ export class DisplayCanvasComponent implements OnInit, AfterViewInit {
 
   clusterMaterials: THREE.PointsMaterial[] = [
     new THREE.PointsMaterial({
-      size: 0.001,
+      size: 0.01,
       color: 0x00ff00,
     }),
     new THREE.PointsMaterial({
-      size: 0.001,
+      size: 0.01,
       color: 0xffff00,
     }),
     new THREE.PointsMaterial({
-      size: 0.001,
+      size: 0.01,
       color: 0xff0000,
     }),
   ];
@@ -100,7 +101,6 @@ export class DisplayCanvasComponent implements OnInit, AfterViewInit {
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvasRef.nativeElement,
-      antialias: true,
     });
     this.renderer.setSize(
       this.canvasRef.nativeElement.clientWidth,
