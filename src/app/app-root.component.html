@@ -1,1 +1,11 @@
-<app-display-canvas></app-display-canvas>
+<app-display-canvas [plyFilePath]="plyFilePath"></app-display-canvas>
+
+<div class="container" appDnd (fileDropped)="onFileDropped($event)">
+  <input
+    type="file"
+    #fileDropRef
+    id="fileDropRef"
+    single
+    (change)="fileBrowseHandler($event)"
+  />
+</div>

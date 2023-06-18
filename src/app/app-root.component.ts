@@ -9,4 +9,13 @@ export class AppRootComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {}
+
+  plyFilePath: File;
+
+  fileBrowseHandler($event): void {
+    console.log('HERE EVENT', $event);
+    this.plyFilePath = $event.target.files[0];
+  }
+
+  onFileDropped(asd): void {}
 }

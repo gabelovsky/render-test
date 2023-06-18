@@ -4,7 +4,9 @@ import {
   OnInit,
   ViewChild,
   AfterViewInit,
-  HostListener,
+  Input,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { Vector3 } from 'three';
 import * as THREE from 'three-full';
@@ -15,11 +17,18 @@ import clusters from '../../assets/input-segmentation-clusters.json';
   templateUrl: './display-canvas.component.html',
   styleUrls: ['./display-canvas.component.css'],
 })
-export class DisplayCanvasComponent implements OnInit, AfterViewInit {
+export class DisplayCanvasComponent
+  implements OnInit, AfterViewInit, OnChanges
+{
   constructor() {}
 
   @ViewChild('canvas')
   private canvasRef: ElementRef;
+
+  @Input()
+  plyFilePath: File;
+
+  defaultPlyPath: string = '../../assets/input-cloud-ascii.ply';
 
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
@@ -49,40 +58,59 @@ export class DisplayCanvasComponent implements OnInit, AfterViewInit {
     this.render();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes?.plyFilePath?.currentValue) {
+      this.clearSceneObjects();
+      this.loadPLYFile();
+    }
+  }
+
   loadPLYFile() {
     const loader = new THREE.PLYLoader();
 
-    loader.load('../../assets/input-cloud-ascii.ply', (geometry) => {
-      geometry.center();
+    console.log('HERE FILE', this.plyFilePath);
+    loader.load(
+      this.plyFilePath ? this.plyFilePath.name : this.defaultPlyPath,
+      (geometry) => {
+        console.log('HERE LOAD', geometry);
+        geometry.center();
 
-      let vectorArrays: Vector3[][] = [];
+        let vectorArrays: Vector3[][] = [];
 
-      clusters.clustersIndices.forEach((cluster, clusterIndex) => {
-        vectorArrays.push([]);
-        cluster.forEach((pointIndex) => {
-          let point = new THREE.Vector3().fromBufferAttribute(
-            geometry.attributes.position,
-            pointIndex
-          );
-          vectorArrays[clusterIndex].push(point);
+        clusters.clustersIndices.forEach((cluster, clusterIndex) => {
+          vectorArrays.push([]);
+          cluster.forEach((pointIndex) => {
+            let point = new THREE.Vector3().fromBufferAttribute(
+              geometry.attributes.position,
+              pointIndex
+            );
+            vectorArrays[clusterIndex].push(point);
+          });
         });
-      });
 
-      const group = new THREE.Group();
+        const group = new THREE.Group();
 
-      vectorArrays.forEach((vectorArray, vectorIndex) => {
-        group.add(
-          new THREE.Points(
-            new THREE.BufferGeometry().setFromPoints(vectorArray),
-            this.clusterMaterials[vectorIndex]
-          )
-        );
-      });
+        vectorArrays.forEach((vectorArray, vectorIndex) => {
+          group.add(
+            new THREE.Points(
+              new THREE.BufferGeometry().setFromPoints(vectorArray),
+              this.clusterMaterials[vectorIndex]
+            )
+          );
+        });
 
-      group.rotation.x = Math.PI / 2;
+        group.rotation.x = Math.PI / 2;
 
-      this.scene.add(group);
-    });
+        this.scene.add(group);
+      }
+    );
+  }
+
+  clearSceneObjects(): void {
+    console.log('HERE SCENES', this.scene);
+    while (this.scene.children.length > 0) {
+      this.scene.remove(this.scene.children[0]);
+    }
   }
 
   setupScene(): void {
