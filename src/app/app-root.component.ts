@@ -13,8 +13,8 @@ export class AppRootComponent implements OnInit {
 
   plyFilePath: string = '../../assets/input-cloud-ascii.ply';
 
-  test(): void {
-    this.httpClient.get('src/assets/*').subscribe((data) => {
+  getPLYFiles(): void {
+    this.httpClient.get('assets/test.txt').subscribe((data) => {
       console.log('HERE' + data);
     });
   }
