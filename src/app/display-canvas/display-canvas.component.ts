@@ -26,9 +26,7 @@ export class DisplayCanvasComponent
   private canvasRef: ElementRef;
 
   @Input()
-  plyFilePath: File;
-
-  defaultPlyPath: string = '../../assets/input-cloud-ascii.ply';
+  plyFilePath: string;
 
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
@@ -68,48 +66,43 @@ export class DisplayCanvasComponent
   loadPLYFile() {
     const loader = new THREE.PLYLoader();
 
-    console.log('HERE FILE', this.plyFilePath);
-    loader.load(
-      this.plyFilePath ? this.plyFilePath.name : this.defaultPlyPath,
-      (geometry) => {
-        console.log('HERE LOAD', geometry);
-        geometry.center();
+    loader.load(this.plyFilePath, (geometry) => {
+      geometry.center();
 
-        let vectorArrays: Vector3[][] = [];
+      let vectorArrays: Vector3[][] = [];
 
-        clusters.clustersIndices.forEach((cluster, clusterIndex) => {
-          vectorArrays.push([]);
-          cluster.forEach((pointIndex) => {
-            let point = new THREE.Vector3().fromBufferAttribute(
-              geometry.attributes.position,
-              pointIndex
-            );
-            vectorArrays[clusterIndex].push(point);
-          });
-        });
-
-        const group = new THREE.Group();
-
-        vectorArrays.forEach((vectorArray, vectorIndex) => {
-          group.add(
-            new THREE.Points(
-              new THREE.BufferGeometry().setFromPoints(vectorArray),
-              this.clusterMaterials[vectorIndex]
-            )
+      clusters.clustersIndices.forEach((cluster, clusterIndex) => {
+        vectorArrays.push([]);
+        cluster.forEach((pointIndex) => {
+          let point = new THREE.Vector3().fromBufferAttribute(
+            geometry.attributes.position,
+            pointIndex
           );
+          vectorArrays[clusterIndex].push(point);
         });
+      });
 
-        group.rotation.x = Math.PI / 2;
+      const group = new THREE.Group();
 
-        this.scene.add(group);
-      }
-    );
+      vectorArrays.forEach((vectorArray, vectorIndex) => {
+        group.add(
+          new THREE.Points(
+            new THREE.BufferGeometry().setFromPoints(vectorArray),
+            this.clusterMaterials[vectorIndex]
+          )
+        );
+      });
+
+      group.rotation.x = Math.PI / 2;
+
+      this.scene.add(group);
+    });
   }
 
   clearSceneObjects(): void {
-    console.log('HERE SCENES', this.scene);
-    while (this.scene.children.length > 0) {
-      this.scene.remove(this.scene.children[0]);
+    for (let i = this.scene.children.length - 1; i >= 0; i--) {
+      if (this.scene.children[i].type === 'Group')
+        this.scene.remove(this.scene.children[i]);
     }
   }
 

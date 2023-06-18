@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -6,16 +7,15 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app-root.component.css'],
 })
 export class AppRootComponent implements OnInit {
-  constructor() {}
+  constructor(private httpClient: HttpClient) {}
 
   ngOnInit() {}
 
-  plyFilePath: File;
+  plyFilePath: string = '../../assets/input-cloud-ascii.ply';
 
-  fileBrowseHandler($event): void {
-    console.log('HERE EVENT', $event);
-    this.plyFilePath = $event.target.files[0];
+  test(): void {
+    this.httpClient.get('src/assets/*').subscribe((data) => {
+      console.log('HERE' + data);
+    });
   }
-
-  onFileDropped(asd): void {}
 }
